@@ -1,0 +1,46 @@
+name: Landingpage (GitHub Pages)
+
+# Einmalig im Repo aktivieren: Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "scripts/landing_template.html"
+      - "scripts/simulator_shim.js"
+      - "scripts/build_landing.py"
+      - "apps/ollama-browser-chat/**"
+      - "docs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pillow
+      - name: Landingpage frisch bauen
+        run: |
+          mkdir -p _site
+          python scripts/build_landing.py --repo "${{ github.repository }}" --out _site/index.html
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,139 @@
+name: Release
+
+# Startet, wenn du einen Tag wie v1.0.0 pushst:
+#   git tag v1.0.0 && git push origin v1.0.0
+# Zusätzlich manuell startbar (Actions -> Release -> Run workflow). Dann entstehen nur Test-Artefakte
+# (7 Tage abrufbar), es wird kein Release veröffentlicht.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ------------------------------------------------------------
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Abhängigkeiten installieren
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-build.txt
+
+      - name: Programme bauen (Installer, Webserver, Pandora Code)
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+        run: python scripts/build_release.py --app installer --app webserver --app code
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  # ------------------------------------------------------------
+  build-macos:
+    runs-on: macos-latest          # Apple Silicon (arm64)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-build.txt
+
+      - name: Programme bauen (Installer, Webserver, Pandora Code)
+        run: python scripts/build_release.py --app installer --app webserver --app code
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          path: release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  # ------------------------------------------------------------
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Systempakete installieren
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2 libtk8.6 libegl1 libgl1 dpkg-dev
+
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-build.txt
+
+      - name: Programme, .deb und Web-Paket bauen
+        run: python scripts/build_release.py --app all
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  # ------------------------------------------------------------
+  release:
+    needs: [build-windows, build-macos, build-linux]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: release
+
+      - name: Vollständigkeit prüfen (alle erwarteten Dateien aus scripts/build_release.py)
+        run: python scripts/build_release.py --check-assets release
+
+      - name: Prüfsummen schreiben
+        run: python scripts/build_release.py --checksums
+
+      - name: Dateien anzeigen
+        run: ls -lh release
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
