@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  chat:
+    name: Chat (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node --check apps/ollama-browser-chat/script.js
+      - run: node apps/ollama-browser-chat/tests/run.js
+
+  python:
+    name: Python-Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install pillow cryptography
+      - name: Mini Webserver
+        run: python -m unittest discover -s apps/mini-webserver/tests
+      - name: Pandora Code
+        working-directory: apps/pandora-code
+        # Pandora Code ist für Linux entwickelt (Shell, Firejail). Unter Windows und macOS gilt der Test als Hinweis.
+        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
+        run: python -m unittest discover -s tests -t .
+      - name: Ollama Models Installer
+        working-directory: apps/ollama-models-installer
+        run: python -m unittest test_ollama_library
+      - name: Skripte (Landingpage, Build)
+        run: python -m unittest discover -s scripts -p "test_*.py"
+
+  landing:
+    name: Landingpage im Browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pillow playwright
+          playwright install --with-deps chromium
+      - name: Landingpage bauen
+        run: python scripts/build_landing.py
+      - name: Browser-Test
+        run: python scripts/browser_check.py
