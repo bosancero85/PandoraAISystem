@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pandora-code"
+dynamic = ["version"]
+description = "Pandora Code – lokaler Coding-Agent für das Terminal (Ollama)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+# Optional: höhere Genauigkeit der AST-Code-Graph-Engine (pandora_code/extensions/ast_graph.py) für
+# JavaScript/TypeScript/C/C++/Lua. Ohne dieses Extra funktionieren AST-Graph UND Vektor-RAG trotzdem weiter
+# (Regex- bzw. Hashing-Näherung als Fallback); Python-Dateien werden immer exakt über das eingebaute
+# `ast`-Modul analysiert. Für echte semantische Codesuche (vector_store.py) reicht stattdessen ein
+# installiertes Ollama-Embedding-Modell (z. B. `ollama pull nomic-embed-text`) – dafür ist kein Extra nötig.
+ast = ["tree_sitter>=0.21", "tree-sitter-languages>=1.10"]
+# Optional: volle Terminal-Oberfläche `pandora code --tui` (pandora_code/ui/tui.py) statt der einfachen
+# Konsole. Ohne dieses Extra funktioniert Pandora Code normal weiter; --tui gibt dann eine klare
+# Installationsanweisung aus, statt sich nur schlechter zu verhalten.
+tui = ["textual>=0.58"]
+# Optional: WebFetch kann JavaScript-Seiten mit einem echten Browser rendern (extensions/web_search.py).
+# Ohne dieses Extra funktioniert WebFetch trotzdem (ungerendertes HTML, mit Hinweis), und WebSearch nutzt
+# eine lokale SearXNG-Instanz oder DuckDuckGo, ganz ohne Zusatzpaket.
+web = ["playwright>=1.40"]
+
+[project.scripts]
+pandora = "pandora_code.cli:pandora_entry"
+pandora-code = "pandora_code.cli:pandora_code_entry"
+
+[tool.setuptools.dynamic]
+version = { attr = "pandora_code.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["pandora_code*"]
+
+[tool.setuptools.package-data]
+pandora_code = ["playbook_template/*"]

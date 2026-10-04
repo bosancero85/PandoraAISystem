@@ -1,0 +1,15 @@
+[project]
+name = "ollama-mobile-chat"
+title = "Pandora Code"
+type = "html-multi-file"
+language = "de"
+license = "MIT"
+version = "1.4.0"
+
+[runtime]
+entry = "ollama.html"
+backend = "Ollama HTTP API (/api/tags, /api/chat)"
+default_port = 11434
+
+[quality]
+tests = "node tests/run.js"

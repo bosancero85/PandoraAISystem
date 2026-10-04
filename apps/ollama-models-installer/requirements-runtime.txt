@@ -1,0 +1,2 @@
+# Laufzeit-Abhaengigkeiten (auch Grundlage fuer das .deb-Paket, siehe build_deb.sh)
+customtkinter>=5.2.2

@@ -1,0 +1,22 @@
+# Steckbrief des Projekts – wird aus dem Interview gefüllt und bei Änderungen aktuell gehalten.
+
+[project]
+name = ""
+beschreibung = ""
+sprache = ""              # z. B. "python"
+zielsysteme = []          # z. B. ["windows", "linux"]
+lizenz = ""               # z. B. "MIT"
+status = "start"          # start | in_arbeit | abgeschlossen
+
+[umfang]
+muss = []
+nicht_ziele = []
+
+[pruefung]
+testbefehl = ""           # z. B. "python -m unittest discover -s tests -t ."
+startbefehl = ""          # z. B. "python -m meinpaket"
+
+[repo]
+readme = "README.de.md"
+lizenzdatei = "LICENSE"
+gitignore = ".gitignore"

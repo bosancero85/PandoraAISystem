@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ollama Models Library & Installer – Windows, macOS, Linux</title>
+  <meta name="description" content="Ollama Models Library & Installer: Modelle durchsuchen, installieren und verwalten – für Windows, macOS und Linux.">
+  <meta name="theme-color" content="#0b0d14">
+  <link rel="icon" href="ollama_model_installer_icon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="ollama_model_installer_icon_256.png">
+  <link rel="apple-touch-icon" href="ollama_model_installer_icon_256.png">
+  <style>
+    :root {
+      --bg: #0b0d14;
+      --bg-soft: #12151f;
+      --card: #141827;
+      --border: #262b40;
+      --text: #e8eaf3;
+      --muted: #a4a9c0;
+      --accent: #9d00ff;
+      --accent-soft: rgba(157, 0, 255, .18);
+      --accent-glow: rgba(157, 0, 255, .55);
+      --radius: 18px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+      background:
+        radial-gradient(900px 500px at 15% -10%, rgba(157,0,255,.22), transparent 60%),
+        radial-gradient(700px 450px at 100% 10%, rgba(0,229,255,.08), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid #d58cff; outline-offset: 3px; border-radius: 8px; }
+    .skip {
+      position: absolute; left: -999px; top: 0; background: var(--accent); color: #fff;
+      padding: .6rem 1rem; z-index: 10; border-radius: 0 0 8px 0;
+    }
+    .skip:focus { left: 0; }
+    .wrap { width: min(1100px, 100% - 2.5rem); margin-inline: auto; }
+
+    /* Header */
+    header { padding: 4.5rem 0 2.5rem; text-align: center; }
+    .eyebrow {
+      display: inline-block; padding: .35rem .9rem; border: 1px solid var(--border);
+      border-radius: 999px; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+      color: #d9a8ff; background: var(--accent-soft);
+    }
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.6rem); line-height: 1.1; margin: 1.2rem 0 .8rem;
+      letter-spacing: -.02em;
+    }
+    h1 span {
+      background: linear-gradient(90deg, #d58cff, var(--accent) 50%, #6a5cff);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .subtitle { font-size: clamp(1.05rem, 2.4vw, 1.3rem); color: var(--muted); max-width: 700px; margin: 0 auto 2rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
+      padding: .9rem 1.6rem; border-radius: 12px; font-weight: 700; font-size: 1rem;
+      text-decoration: none; border: 1px solid transparent; cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #6a1bff); color: #fff;
+      box-shadow: 0 6px 24px -6px var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 34px -4px var(--accent-glow); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-2px); }
+    .hero-note { margin-top: .9rem; font-size: .9rem; color: var(--muted); min-height: 1.4em; }
+
+    /* Features */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin: 1rem 0 3.5rem; padding: 0; list-style: none; }
+    .features li {
+      background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.2rem;
+      transition: border-color .25s, transform .25s;
+    }
+    .features li:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .features strong { display: block; margin-bottom: .2rem; color: #e3b8ff; }
+    .features span { color: var(--muted); font-size: .95rem; }
+
+    /* OS Cards */
+    h2 { font-size: clamp(1.5rem, 4vw, 2rem); text-align: center; margin: 0 0 .4rem; }
+    .section-sub { text-align: center; color: var(--muted); margin: 0 0 2rem; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; padding: 0; list-style: none; margin: 0; }
+    .card {
+      position: relative; display: flex; flex-direction: column; gap: .8rem;
+      background: linear-gradient(180deg, var(--card), var(--bg-soft));
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2rem 1.5rem 1.6rem; text-align: center;
+      transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+    }
+    .card:hover { transform: translateY(-6px); border-color: #5a2a86; box-shadow: 0 16px 40px -18px rgba(157,0,255,.6); }
+    .card .icon { width: 64px; height: 64px; margin: 0 auto .2rem; fill: #cfd3e6; transition: fill .3s, transform .3s; }
+    .card:hover .icon { transform: scale(1.08); fill: #e3b8ff; }
+    .card h3 { margin: 0; font-size: 1.4rem; }
+    .card .file { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; color: var(--muted); word-break: break-all; }
+    .card .req { font-size: .9rem; color: var(--muted); margin: 0; }
+    .card .btn { margin-top: auto; width: 100%; }
+    .badge {
+      display: none; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #fff; font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+      padding: .35rem .9rem; border-radius: 999px; white-space: nowrap;
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+    .card.recommended {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #1c1030, var(--bg-soft));
+      box-shadow: 0 0 0 1px var(--accent), 0 0 42px -4px var(--accent-glow);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .card.recommended .badge { display: block; }
+    .card.recommended .icon { fill: #e3b8ff; }
+    .card.recommended .btn-primary { padding-block: 1.05rem; font-size: 1.08rem; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 1px var(--accent), 0 0 34px -6px var(--accent-glow); }
+      50% { box-shadow: 0 0 0 1px var(--accent), 0 0 56px 0 var(--accent-glow); }
+    }
+
+    .steps { margin: 3.5rem 0 3rem; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.8rem; }
+    .steps h2 { text-align: left; font-size: 1.4rem; }
+    .steps ol { margin: .8rem 0 0; padding-left: 1.3rem; color: var(--muted); }
+    .steps code { background: #1b1f30; padding: .1rem .4rem; border-radius: 6px; color: #e3b8ff; font-size: .9em; }
+
+    /* Footer */
+    footer { margin-top: auto; border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; color: var(--muted); font-size: .95rem; background: rgba(11,13,20,.7); }
+    footer a { color: #d9a8ff; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .2s, color .2s; }
+    footer a:hover { color: #fff; border-color: var(--accent); }
+
+    /* Logo */
+    .logo {
+      display: block;
+      margin: 0 auto 1.2rem;
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
+      box-shadow: 0 0 32px -4px var(--accent-glow);
+      transition: transform .3s ease;
+    }
+    .logo:hover { transform: scale(1.06) rotate(-3deg); }
+
+    @media (max-width: 900px) {
+      .cards { grid-template-columns: 1fr; max-width: 460px; margin-inline: auto; }
+      .card.recommended { order: -1; }
+      header { padding-top: 3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#downloads">Zum Download-Bereich springen</a>
+
+  <header>
+    <div class="wrap">
+      <img class="logo" src="ollama_model_installer_icon_256.png"
+           alt="Logo Ollama Models Library &amp; Installer" width="96" height="96">
+      <span class="eyebrow">Open Source · Windows · macOS · Linux</span>
+      <h1>Ollama Models <span>Library &amp; Installer</span></h1>
+      <p class="subtitle">Lokale KI-Modelle finden, installieren und verwalten – mit einem Klick, auf jedem System.</p>
+      <a id="heroBtn" class="btn btn-primary" href="#downloads">Zu den Downloads ↓</a>
+      <p id="heroNote" class="hero-note" aria-live="polite"></p>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+      <ul class="features" aria-label="Funktionen">
+        <li><strong>Modell-Bibliothek</strong><span>Durchsuche beliebte Ollama-Modelle und finde das passende für deine Hardware.</span></li>
+        <li><strong>1-Klick-Installation</strong><span>Ollama und Modelle ohne Terminal-Gefrickel einrichten und aktualisieren.</span></li>
+        <li><strong>Cross-Plattform</strong><span>Native Installer für Windows, macOS und Linux – identische Bedienung.</span></li>
+        <li><strong>Lokal &amp; privat</strong><span>Deine Daten bleiben auf deinem Rechner. Keine Cloud, kein Tracking.</span></li>
+      </ul>
+
+      <section id="downloads" aria-labelledby="dl-title">
+        <h2 id="dl-title">Installer herunterladen</h2>
+        <p class="section-sub" id="sectionSub">Wähle dein Betriebssystem.</p>
+
+        <ul class="cards">
+          <li class="card" data-os="windows">
+            <span class="badge">★ Empfohlen für dein System</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zM11.6 4.25 21 3v8.5h-9.4zM3 12.5h7.5v7.1L3 18.5zM11.6 12.5H21V21l-9.4-1.3z"/></svg>
+            <h3>Windows</h3>
+            <span class="file">Ollama-Installer-Win.exe</span>
+            <p class="req">Windows 10 / 11 (64-Bit)</p>
+            <a class="btn btn-ghost" data-file="Ollama-Installer-Win.exe" href="#" rel="noopener">Download für Windows</a>
+          </li>
+          <li class="card" data-os="macos">
+            <span class="badge">★ Empfohlen für dein System</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.15-2.9.9-3.7.9-.77 0-1.9-.86-3.2-.83-1.6.02-3.1.97-4 2.4-1.7 3-.44 7.4 1.2 9.8.8 1.2 1.8 2.5 3.1 2.5 1.2-.05 1.7-.8 3.2-.8s1.9.8 3.2.77c1.3-.02 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8-.03-.01-2.5-.96-2.7-3.9zM14 5.4c.67-.83 1.13-1.95 1-3.1-.97.04-2.15.65-2.85 1.47-.62.72-1.17 1.9-1.03 3 1.08.08 2.2-.55 2.88-1.37z"/></svg>
+            <h3>macOS</h3>
+            <span class="file">Ollama-Installer-Mac.dmg</span>
+            <p class="req">macOS 12 oder neuer (Intel &amp; Apple Silicon)</p>
+            <a class="btn btn-ghost" data-file="Ollama-Installer-Mac.dmg" href="#" rel="noopener">Download für macOS</a>
+          </li>
+          <li class="card" data-os="linux">
+            <span class="badge">★ Empfohlen für dein System</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.6 0 1.5-.3 2.3-1.2 3.6C6 11.9 5 13.7 5 15.6c0 1 .3 1.7.9 2.2-.4.6-1.1.9-1.9 1.2-.7.3-.4 1.1.4 1.3 1.4.3 2.7.5 3.6-.4.5-.5.9-.7 1.4-.4.6.3 1.5.5 2.6.5s2-.2 2.6-.5c.5-.3.9-.1 1.4.4.9.9 2.2.7 3.6.4.8-.2 1.1-1 .4-1.3-.8-.3-1.5-.6-1.9-1.2.6-.5.9-1.2.9-2.2 0-1.9-1-3.7-2.2-5.4-.9-1.3-1.2-2.100-1.200-3.600C15.600 3.900 14.200 2 12 2zm-1.500 4.200a.9.900 0 1 1 0 1.800.9.900 0 0 1 0-1.800zm3 0a.9.900 0 1 1 0 1.800.9.900 0 0 1 0-1.800zM12 8.400c.9 0 1.700.5 1.700 1s-.8 1-1.700 1-1.700-.5-1.700-1 .8-1 1.700-1z"/></svg>
+            <h3>Linux</h3>
+            <span class="file">Ollama-Installer-Linux.AppImage</span>
+            <p class="req">x86_64 · <code>chmod +x</code> und starten</p>
+            <a class="btn btn-ghost" data-file="Ollama-Installer-Linux.AppImage" href="#" rel="noopener">Download für Linux</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="steps" aria-labelledby="steps-title">
+        <h2 id="steps-title">So startest du</h2>
+        <ol>
+          <li>Installer für dein System herunterladen.</li>
+          <li>Starten – unter Linux zuerst <code>chmod +x Ollama-Installer-Linux.AppImage</code> ausführen.</li>
+          <li>Modell aus der Bibliothek wählen und mit einem Klick installieren.</li>
+        </ol>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>
+        Open Source auf
+        <a href="https://github.com/bosancero85/Ollama-Models-Libary-and-Installer-Mac-Linux-Win" rel="noopener">GitHub: bosancero85/Ollama-Models-Libary-and-Installer-Mac-Linux-Win</a>
+      </p>
+      <p>Sterne, Issues und Pull Requests sind willkommen.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var REPO = 'bosancero85/Ollama-Models-Libary-and-Installer-Mac-Linux-Win';
+      var BASE = 'https://github.com/' + REPO + '/releases/latest/download/';
+      var NAMES = { windows: 'Windows', macos: 'macOS', linux: 'Linux' };
+
+      // Download-Links setzen
+      document.querySelectorAll('.card .btn[data-file]').forEach(function (a) {
+        a.href = BASE + a.getAttribute('data-file');
+      });
+
+      function detectOS() {
+        var nav = navigator;
+        var uaData = nav.userAgentData && nav.userAgentData.platform ? nav.userAgentData.platform : '';
+        var ua = nav.userAgent || '';
+        var plat = nav.platform || '';
+        var all = (uaData + ' ' + plat + ' ' + ua).toLowerCase();
+
+        // Mobile Geräte: keine passenden Desktop-Installer
+        if (/android|iphone|ipad|ipod|mobile/.test(all)) return { os: null, mobile: true };
+        // iPadOS meldet sich als Mac, hat aber Touch
+        if (/mac/.test(all) && nav.maxTouchPoints > 1) return { os: null, mobile: true };
+
+        if (/win/.test(all)) return { os: 'windows' };
+        if (/mac|darwin/.test(all)) return { os: 'macos' };
+        if (/linux|x11|cros|ubuntu|debian|fedora/.test(all)) return { os: 'linux' };
+        return { os: null };
+      }
+
+      var result = detectOS();
+      var heroBtn = document.getElementById('heroBtn');
+      var heroNote = document.getElementById('heroNote');
+      var sectionSub = document.getElementById('sectionSub');
+
+      if (result.os) {
+        var card = document.querySelector('.card[data-os="' + result.os + '"]');
+        var btn = card.querySelector('.btn');
+        card.classList.add('recommended');
+        btn.classList.remove('btn-ghost');
+        btn.classList.add('btn-primary');
+
+        // Sichtbar an erste Stelle rücken (Grid-Reihenfolge)
+        var list = card.parentNode;
+        list.insertBefore(card, list.firstChild);
+
+        heroBtn.href = btn.href;
+        heroBtn.textContent = '⬇ Jetzt für ' + NAMES[result.os] + ' herunterladen';
+        heroNote.textContent = 'Wir haben ' + NAMES[result.os] + ' auf deinem System erkannt. ' + 'Datei: ' + btn.getAttribute('data-file');
+        sectionSub.textContent = 'Empfohlen für dein System: ' + NAMES[result.os] + ' – andere Plattformen findest du unten.';
+      } else if (result.mobile) {
+        heroNote.textContent = 'Die Installer sind für Desktop-Systeme gedacht – öffne diese Seite auf deinem Rechner.';
+      } else {
+        heroNote.textContent = 'System nicht eindeutig erkannt – bitte wähle unten manuell.';
+      }
+    })();
+  </script>
+</body>
+</html>

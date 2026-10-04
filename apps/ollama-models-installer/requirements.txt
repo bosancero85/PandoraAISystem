@@ -1,0 +1,7 @@
+# Alles fuer Entwicklung und Builds
+# (Windows: build.bat | Linux/Debian: build_deb.sh | macOS: build_mac.sh)
+-r requirements-runtime.txt
+
+# Build-Abhaengigkeiten (EXE/App-Erstellung, Icon-Erzeugung)
+pyinstaller>=6.0
+pillow>=10.0
