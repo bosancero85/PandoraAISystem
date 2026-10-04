@@ -1,0 +1,26 @@
+[project]
+name = "pandora-ai-system"
+title = "Pandora AI System"
+type = "monorepo"
+language = "de"
+license = "MIT"
+version = "1.0.0"
+repository = "bosancero85/PandoraAISystem"
+
+[apps]
+chat = "apps/ollama-browser-chat"
+webserver = "apps/mini-webserver"
+installer = "apps/ollama-models-installer"
+code = "apps/pandora-code"
+
+[build]
+landing = "python scripts/build_landing.py"
+release = "python scripts/build_release.py --app all"
+checksums = "python scripts/build_release.py --checksums"
+
+[quality]
+chat = "node apps/ollama-browser-chat/tests/run.js"
+webserver = "python -m unittest discover -s apps/mini-webserver/tests"
+code = "python -m unittest discover -s apps/pandora-code/tests -t apps/pandora-code"
+scripts = "python -m unittest discover -s scripts -p test_*.py"
+browser = "python scripts/browser_check.py"

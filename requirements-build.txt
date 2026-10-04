@@ -1,0 +1,7 @@
+# Alles, was zum Bauen der Programme (scripts/build_release.py) nötig ist.
+# Installation:  pip install -r requirements-build.txt
+pyinstaller>=6.0
+pillow>=10.0
+customtkinter>=5.2.2
+pystray>=0.19.5
+cryptography>=42.0.0

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pandora® AI System – lokale KI mit Ollama für Windows, macOS und Linux</title>
+  <meta name="description" content="Pandora AI System: Modelle installieren, per Handy chatten, im Terminal programmieren. Alles lokal mit Ollama. Mit Live-Simulator zum Ausprobieren.">
+  <meta name="theme-color" content="#070913">
+  <meta property="og:title" content="Pandora® AI System">
+  <meta property="og:description" content="Dein lokales KI-Werkzeugset rund um Ollama. Live-Simulator, Downloads für Windows, macOS und Linux.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="{{FAVICON}}">
+  <style>
+    :root {
+      --bg: #070913;
+      --bg-soft: #0e1220;
+      --card: #121730;
+      --border: #232a4a;
+      --text: #e8f0ff;
+      --muted: #9aa4c4;
+      --cyan: #22e4ff;
+      --violet: #9d4dff;
+      --pink: #ff3bd4;
+      --glow: rgba(34, 228, 255, .45);
+      --radius: 18px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+      background:
+        radial-gradient(900px 520px at 12% -8%, rgba(157, 77, 255, .22), transparent 60%),
+        radial-gradient(800px 480px at 100% 6%, rgba(34, 228, 255, .12), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; }
+    img { max-width: 100%; height: auto; display: block; }
+    :focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; border-radius: 8px; }
+    .skip { position: absolute; left: -999px; top: 0; background: var(--cyan); color: #04121a; padding: .6rem 1rem; z-index: 50; border-radius: 0 0 8px 0; font-weight: 700; }
+    .skip:focus { left: 0; }
+    .wrap { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+    section { padding: 3.2rem 0 0; }
+    h2 { font-size: clamp(1.5rem, 4vw, 2.1rem); text-align: center; margin: 0 0 .4rem; letter-spacing: -.01em; }
+    .section-sub { text-align: center; color: var(--muted); margin: 0 auto 2rem; max-width: 720px; }
+
+    /* ---------- Header ---------- */
+    header { padding: 3.2rem 0 1.5rem; text-align: center; }
+    .eyebrow { display: inline-block; padding: .35rem .9rem; border: 1px solid var(--border); border-radius: 999px; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: #9fefff; background: rgba(34, 228, 255, .08); }
+    h1 { font-size: clamp(2rem, 6vw, 3.6rem); line-height: 1.1; margin: 1.1rem 0 .8rem; letter-spacing: -.02em; }
+    h1 span { background: linear-gradient(90deg, var(--cyan), var(--violet) 55%, var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .subtitle { font-size: clamp(1.05rem, 2.4vw, 1.3rem); color: var(--muted); max-width: 740px; margin: 0 auto 1.6rem; }
+    .cta { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; padding: .85rem 1.5rem; border-radius: 12px; font-weight: 700; font-size: 1rem; text-decoration: none; border: 1px solid transparent; cursor: pointer; font-family: inherit; transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease; }
+    .btn-primary { background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #04121a; box-shadow: 0 6px 24px -6px var(--glow); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 34px -4px var(--glow); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--cyan); background: rgba(34, 228, 255, .08); transform: translateY(-2px); }
+    .hero-note { margin-top: .9rem; font-size: .9rem; color: var(--muted); min-height: 1.4em; }
+    .banner { margin: 2rem auto 0; border-radius: 22px; border: 1px solid var(--border); box-shadow: 0 20px 60px -24px var(--glow); width: min(980px, 100%); }
+
+    /* ---------- Features ---------- */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin: 2.4rem 0 0; padding: 0; list-style: none; }
+    .features li { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.2rem; transition: border-color .25s, transform .25s; }
+    .features li:hover { border-color: var(--cyan); transform: translateY(-3px); }
+    .features strong { display: block; margin-bottom: .2rem; color: #9fefff; }
+    .features span { color: var(--muted); font-size: .95rem; }
+
+    /* ---------- Werkzeuge ---------- */
+    .tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.4rem; padding: 0; margin: 0; list-style: none; }
+    .tool { display: flex; flex-direction: column; background: linear-gradient(180deg, var(--card), var(--bg-soft)); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease; }
+    .tool:hover { transform: translateY(-5px); border-color: #3a4a8a; box-shadow: 0 16px 40px -20px var(--glow); }
+    .shot { display: block; width: 100%; padding: 0; border: 0; background: #04060d; cursor: zoom-in; aspect-ratio: 16 / 10; overflow: hidden; }
+    .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform .4s ease; }
+    .shot:hover img { transform: scale(1.03); }
+    .tool-body { padding: 1.2rem 1.4rem 1.4rem; display: flex; flex-direction: column; gap: .5rem; flex: 1; }
+    .tool h3 { margin: 0; font-size: 1.25rem; }
+    .tool p { margin: 0; color: var(--muted); font-size: .96rem; }
+    .tool ul { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .92rem; }
+    .tool .more { margin-top: auto; padding-top: .6rem; color: #9fefff; text-decoration: none; font-weight: 600; font-size: .92rem; }
+    .tool .more:hover { text-decoration: underline; }
+
+    /* ---------- Simulator ---------- */
+    .sim { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; align-items: start; }
+    .sim-info { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.6rem; }
+    .sim-info h3 { margin: 0 0 .4rem; font-size: 1.2rem; }
+    .sim-info p { color: var(--muted); margin: .3rem 0 1rem; font-size: .96rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+    .chip { background: rgba(34, 228, 255, .08); border: 1px solid var(--border); color: var(--text); border-radius: 999px; padding: .45rem .95rem; font: inherit; font-size: .9rem; cursor: pointer; transition: border-color .2s, background .2s; }
+    .chip:hover { border-color: var(--cyan); background: rgba(34, 228, 255, .16); }
+    .chip.warn { border-color: #6b3a4a; background: rgba(255, 59, 92, .1); }
+    .chip.warn:hover { border-color: #ff3b5c; }
+    .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1rem; }
+    .toggle button { background: transparent; color: var(--muted); border: 0; padding: .45rem 1rem; font: inherit; font-size: .9rem; cursor: pointer; }
+    .toggle button[aria-pressed="true"] { background: rgba(34, 228, 255, .16); color: var(--text); }
+    .legend { font-size: .86rem; color: var(--muted); margin: 0; padding-left: 1.1rem; }
+    .legend b { color: var(--text); }
+    .frame { width: 392px; max-width: 100%; height: 760px; border: 1px solid var(--border); border-radius: 30px; background: #04060d; padding: 8px; box-shadow: 0 24px 70px -26px var(--glow); transition: width .35s ease; }
+    .frame.desktop { width: min(780px, 100%); border-radius: 18px; }
+    .frame iframe { width: 100%; height: 100%; border: 0; border-radius: 22px; background: var(--bg); display: block; }
+    .frame.desktop iframe { border-radius: 12px; }
+    .sim.is-desktop { grid-template-columns: 1fr; }
+
+    /* ---------- Galerie ---------- */
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; padding: 0; margin: 0; list-style: none; }
+    .gallery .shot { border-radius: 14px; border: 1px solid var(--border); aspect-ratio: 4 / 3; }
+    .gallery figcaption { color: var(--muted); font-size: .86rem; padding: .4rem .2rem 0; }
+    .gallery figure { margin: 0; }
+
+    /* ---------- Downloads ---------- */
+    .os-switch { display: flex; justify-content: center; gap: .6rem; margin: 0 0 1.6rem; flex-wrap: wrap; }
+    .os-switch button { background: var(--bg-soft); border: 1px solid var(--border); color: var(--muted); border-radius: 12px; padding: .65rem 1.3rem; font: inherit; font-weight: 700; cursor: pointer; transition: border-color .2s, color .2s, box-shadow .2s; }
+    .os-switch button:hover { border-color: var(--cyan); color: var(--text); }
+    .os-switch button[aria-pressed="true"] { border-color: var(--cyan); color: var(--text); box-shadow: 0 0 0 1px var(--cyan), 0 0 28px -6px var(--glow); }
+    .downloads { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; padding: 0; margin: 0; list-style: none; }
+    .dl { background: linear-gradient(180deg, var(--card), var(--bg-soft)); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem; display: flex; flex-direction: column; gap: .5rem; }
+    .dl h3 { margin: 0; font-size: 1.1rem; }
+    .dl .file { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; color: var(--muted); word-break: break-all; min-height: 2.4em; }
+    .dl .req { font-size: .88rem; color: var(--muted); margin: 0; }
+    .dl .btn { margin-top: auto; width: 100%; }
+    .dl .alt { font-size: .85rem; color: var(--muted); margin: 0; }
+    .dl .alt a { color: #9fefff; }
+
+    .steps { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.8rem; }
+    .steps h2 { text-align: left; font-size: 1.4rem; }
+    .steps ol { margin: .8rem 0 0; padding-left: 1.3rem; color: var(--muted); }
+    .steps li { margin-bottom: .4rem; }
+    .steps code { background: #161c34; padding: .1rem .4rem; border-radius: 6px; color: #9fefff; font-size: .9em; }
+    .hint { margin: 1rem 0 0; font-size: .9rem; color: var(--muted); }
+
+    /* ---------- Lightbox ---------- */
+    dialog { border: 1px solid var(--border); border-radius: 16px; padding: 0; background: #04060d; max-width: min(1200px, 94vw); max-height: 92vh; }
+    dialog::backdrop { background: rgba(2, 4, 10, .86); }
+    dialog img { max-height: 86vh; width: auto; margin: 0 auto; }
+    dialog form { position: absolute; top: .5rem; right: .5rem; margin: 0; }
+    dialog button { background: rgba(7, 9, 19, .85); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: .4rem .8rem; cursor: pointer; font: inherit; }
+
+    footer { margin-top: 4rem; border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; color: var(--muted); font-size: .95rem; background: rgba(7, 9, 19, .7); }
+    footer a { color: #9fefff; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .2s, color .2s; }
+    footer a:hover { color: #fff; border-color: var(--cyan); }
+    footer p { margin: .3rem 0; }
+
+    @media (max-width: 980px) {
+      .sim { grid-template-columns: 1fr; }
+      .frame { margin-inline: auto; }
+      .tools { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .frame { height: 700px; }
+      header { padding-top: 2.2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#simulator">Zum Live-Simulator springen</a>
+
+  <header>
+    <div class="wrap">
+      <span class="eyebrow">Open Source · Lokal · Windows · macOS · Linux</span>
+      <h1>Pandora® <span>AI System</span></h1>
+      <p class="subtitle">Dein lokales KI-Werkzeugset rund um Ollama: Modelle installieren, per Handy chatten, im Terminal programmieren. Ohne Cloud, ohne Konto.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#simulator">▶ Live-Simulator testen</a>
+        <a id="heroDl" class="btn btn-ghost" href="#downloads">⬇ Downloads</a>
+      </div>
+      <p id="heroNote" class="hero-note" aria-live="polite"></p>
+      <img class="banner" src="{{BANNER}}" alt="Pandora AI System: leuchtende Kugel aus Netzlinien vor einer GitHub-Repository-Ansicht" width="1200" height="655">
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+      <ul class="features" aria-label="Eigenschaften">
+        <li><strong>Lokal und privat</strong><span>Alles läuft über Ollama auf deiner Hardware. Keine Daten gehen an Dritte.</span></li>
+        <li><strong>Chat am Handy</strong><span>Über HTTPS im WLAN, mit Diktieren, Dateien und digitaler Token-Anzeige.</span></li>
+        <li><strong>Modelle per Klick</strong><span>238 Modellfamilien durchsuchen, Größe wählen, im Batch installieren.</span></li>
+        <li><strong>Agent im Terminal</strong><span>Coding-Agent mit Diff-Vorschau, Router, Code-Graph und Auto-Fix.</span></li>
+      </ul>
+
+      <section id="werkzeuge" aria-labelledby="t-title">
+        <h2 id="t-title">Die vier Werkzeuge</h2>
+        <p class="section-sub">Jedes Werkzeug funktioniert allein. Zusammen ergeben sie eine komplette lokale KI-Umgebung. Klicke auf ein Bild für die große Ansicht.</p>
+        <ul class="tools">
+          <li class="tool">
+            <button class="shot" type="button"><img src="{{IMG:chat_desktop}}" alt="Ollama Browser Chat auf dem Desktop mit Code-Antwort und Token-Anzeige" loading="lazy"></button>
+            <div class="tool-body">
+              <h3>Ollama Browser Chat</h3>
+              <p>Chat-Oberfläche für Handy und Desktop, ohne Abhängigkeiten. Chats bleiben lokal im Browser.</p>
+              <ul><li>Streaming, Markdown, Code-Blöcke, Artefakte</li><li>7-Segment-Token-Anzeige mit Kontextwarnung</li><li>Diktieren, Anhänge, Export, App-Installation (PWA)</li></ul>
+              <a class="more" href="https://github.com/{{REPO}}/tree/main/apps/ollama-browser-chat" rel="noopener">Ordner auf GitHub →</a>
+            </div>
+          </li>
+          <li class="tool">
+            <button class="shot" type="button"><img src="{{IMG:mini}}" alt="Mini Webserver mit Adresse fürs Handy" loading="lazy"></button>
+            <div class="tool-body">
+              <h3>Mini Webserver</h3>
+              <p>Liefert einen Ordner im Netzwerk aus und ist die Brücke zwischen Handy und Ollama.</p>
+              <ul><li>HTTPS mit eigener Zertifizierungsstelle, nötig fürs Diktieren</li><li>Ollama-Weiterleitung mit Streaming</li><li>Start/Stopp, Log, Tray-Symbol</li></ul>
+              <a class="more" href="https://github.com/{{REPO}}/tree/main/apps/mini-webserver" rel="noopener">Ordner auf GitHub →</a>
+            </div>
+          </li>
+          <li class="tool">
+            <button class="shot" type="button"><img src="{{IMG:installer}}" alt="Ollama Models Library und Installer mit Modellliste" loading="lazy"></button>
+            <div class="tool-body">
+              <h3>Ollama Models Library &amp; Installer</h3>
+              <p>Grafische Oberfläche statt <code>ollama pull</code>, mit der kompletten Ollama-Bibliothek.</p>
+              <ul><li>Suche, Kategorien, Größenwahl je Modell</li><li>Speicherschätzung vor dem Download</li><li>Batch-Installation mit Fortschritt</li></ul>
+              <a class="more" href="https://github.com/{{REPO}}/tree/main/apps/ollama-models-installer" rel="noopener">Ordner auf GitHub →</a>
+            </div>
+          </li>
+          <li class="tool">
+            <button class="shot" type="button"><img src="{{IMG:code_term}}" alt="Pandora Code im Terminal mit grünem ASCII-Banner und Befehlsliste" loading="lazy"></button>
+            <div class="tool-body">
+              <h3>Pandora® Code</h3>
+              <p>Lokaler Coding-Agent fürs Terminal, nur mit der Python-Standardbibliothek.</p>
+              <ul><li>Read, Write, Edit, Bash, Grep, Todo mit Diff-Vorschau</li><li>Modell-Router, AST-Graph, Vektor-RAG, Auto-Fix</li><li>Subagenten, Hooks, MCP, optionale Sandbox und TUI</li></ul>
+              <a class="more" href="https://github.com/{{REPO}}/tree/main/apps/pandora-code" rel="noopener">Ordner auf GitHub →</a>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section id="simulator" aria-labelledby="s-title">
+        <h2 id="s-title">Live-Simulator</h2>
+        <p class="section-sub">Das ist die echte Chat-App, direkt in dieser Seite. Statt Ollama antwortet ein kleiner Simulator, also brauchst du hier nichts zu installieren.</p>
+        <div id="sim" class="sim">
+          <div class="sim-info">
+            <h3>Probier es aus</h3>
+            <p>Tippe unten in der App etwas ein oder nutze eine Vorlage:</p>
+            <ul class="chips" aria-label="Beispielnachrichten">
+              <li><button class="chip" type="button" data-say="Hallo">Hallo</button></li>
+              <li><button class="chip" type="button" data-say="Schreibe mir eine Python-Funktion">Python-Funktion</button></li>
+              <li><button class="chip" type="button" data-say="Zeig mir eine HTML-Seite">HTML-Seite</button></li>
+              <li><button class="chip" type="button" data-say="Was zeigt die Token-Anzeige?">Token-Anzeige erklären</button></li>
+              <li><button class="chip warn" type="button" data-say="Kontextwarnung zeigen">Kontextwarnung zeigen</button></li>
+            </ul>
+            <div class="toggle" role="group" aria-label="Ansicht">
+              <button type="button" id="viewPhone" aria-pressed="true">Handy</button>
+              <button type="button" id="viewDesk" aria-pressed="false">Desktop</button>
+            </div>
+            <ul class="legend">
+              <li><b>IN</b> (cyan): Tokens der letzten Anfrage</li>
+              <li><b>OUT</b> (magenta): Tokens der Antwort, zählt live mit</li>
+              <li><b>Σ</b> (grün): Summe in diesem Chat</li>
+              <li>Wird <b>IN</b> gelb oder rot, ist das Kontextfenster fast oder ganz voll</li>
+            </ul>
+            <p class="hint">Die Antworten sind vorgefertigt. Mit echtem Ollama kommen sie von deinem Modell. Mikrofon und Anhänge sind in der Demo ausgeschaltet.</p>
+          </div>
+          <div id="frame" class="frame">
+            <iframe id="simFrame" title="Live-Simulator der Ollama-Chat-App" srcdoc="{{SIM_SRCDOC}}"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section id="galerie" aria-labelledby="g-title">
+        <h2 id="g-title">Mehr Eindrücke</h2>
+        <p class="section-sub">Handy, Einstellungen, Kontextwarnung und die Terminal-Oberfläche von Pandora Code.</p>
+        <ul class="gallery">
+          <li><figure><button class="shot" type="button"><img src="{{IMG:chat_handy}}" alt="Chat auf dem Handy mit HTML-Antwort" loading="lazy"></button><figcaption>Chat auf dem Handy</figcaption></figure></li>
+          <li><figure><button class="shot" type="button"><img src="{{IMG:chat_kontext}}" alt="Rote Kontextwarnung in der Token-Anzeige" loading="lazy"></button><figcaption>Kontextwarnung</figcaption></figure></li>
+          <li><figure><button class="shot" type="button"><img src="{{IMG:chat_settings}}" alt="Einstellungen des Chats mit Ollama-Adresse und Kontextfenster" loading="lazy"></button><figcaption>Einstellungen</figcaption></figure></li>
+          <li><figure><button class="shot" type="button"><img src="{{IMG:code_tui}}" alt="Pandora Code Textual-Oberfläche mit Chat links und Diff rechts" loading="lazy"></button><figcaption>Pandora Code: TUI</figcaption></figure></li>
+          <li><figure><button class="shot" type="button"><img src="{{IMG:code_tui_keys}}" alt="Tastenübersicht der Pandora-Code-Oberfläche" loading="lazy"></button><figcaption>Pandora Code: Tasten</figcaption></figure></li>
+        </ul>
+      </section>
+
+      <section id="downloads" aria-labelledby="d-title">
+        <h2 id="d-title">Downloads</h2>
+        <p id="dlSub" class="section-sub">Wähle dein System. Die Dateien kommen aus dem neuesten GitHub-Release.</p>
+        <div class="os-switch" role="group" aria-label="Betriebssystem">
+          <button type="button" data-os="windows" aria-pressed="false">Windows</button>
+          <button type="button" data-os="macos" aria-pressed="false">macOS</button>
+          <button type="button" data-os="linux" aria-pressed="false">Linux</button>
+        </div>
+        <ul class="downloads" id="dlList">
+          <li class="dl" data-tool="installer">
+            <h3>Models Installer</h3>
+            <span class="file" data-role="file"></span>
+            <p class="req" data-role="req"></p>
+            <a class="btn btn-primary" data-role="btn" href="#" rel="noopener">Herunterladen</a>
+          </li>
+          <li class="dl" data-tool="webserver">
+            <h3>Mini Webserver</h3>
+            <span class="file" data-role="file"></span>
+            <p class="req" data-role="req"></p>
+            <a class="btn btn-primary" data-role="btn" href="#" rel="noopener">Herunterladen</a>
+          </li>
+          <li class="dl" data-tool="code">
+            <h3>Pandora Code</h3>
+            <span class="file" data-role="file"></span>
+            <p class="req" data-role="req"></p>
+            <a class="btn btn-primary" data-role="btn" href="#" rel="noopener">Herunterladen</a>
+            <p class="alt" data-role="alt"></p>
+          </li>
+          <li class="dl" data-tool="chat">
+            <h3>Ollama Browser Chat</h3>
+            <span class="file" data-role="file"></span>
+            <p class="req" data-role="req"></p>
+            <a class="btn btn-primary" data-role="btn" href="#" rel="noopener">Herunterladen</a>
+          </li>
+        </ul>
+        <p class="hint" style="text-align:center">Prüfsummen: <code>SHA256SUMS.txt</code> im Release. Die Programme sind nicht signiert: Windows zeigt SmartScreen, auf dem Mac hilft Rechtsklick und „Öffnen“. Mac-Programme sind für Apple Silicon gebaut.</p>
+      </section>
+
+      <section class="steps-wrap" aria-labelledby="q-title">
+        <div class="steps">
+          <h2 id="q-title">Schnellstart</h2>
+          <ol>
+            <li><a href="https://ollama.com/download" rel="noopener">Ollama installieren</a> und mit dem <strong>Models Installer</strong> ein Modell holen, zum Beispiel <code>qwen2.5-coder:7b</code>.</li>
+            <li><strong>Mini Webserver</strong> starten, den Ordner des Chats wählen, HTTPS an lassen und „Server starten“ klicken.</li>
+            <li>Am Handy im selben WLAN die angezeigte Adresse öffnen, zum Beispiel <code>https://192.168.178.40:8080/ollama.html</code>. Die Zertifikatswarnung einmal bestätigen.</li>
+            <li>Im Terminal <code>pandora code</code> starten und mit dem Agenten programmieren.</li>
+          </ol>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Open Source auf <a href="https://github.com/{{REPO}}" rel="noopener">GitHub: {{REPO}}</a> · Lizenz MIT</p>
+      <p>Sterne, Issues und Pull Requests sind willkommen.</p>
+      <p>Pandora® | by AKI_SystemDown ©2026</p>
+    </div>
+  </footer>
+
+  <dialog id="lb" aria-label="Große Ansicht">
+    <form method="dialog"><button aria-label="Schließen">Schließen ✕</button></form>
+    <img id="lbImg" src="" alt="">
+  </dialog>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var REPO = '{{REPO}}';
+      var BASE = 'https://github.com/' + REPO + '/releases/latest/download/';
+      var NAMES = { windows: 'Windows', macos: 'macOS', linux: 'Linux' };
+
+      // Dateinamen je Werkzeug und System. Muss zu release.yml und scripts/build_release.py passen.
+      var FILES = {
+        installer: { windows: 'Ollama-Installer-Win.exe', macos: 'Ollama-Installer-Mac.dmg', linux: 'Ollama-Installer-Linux.AppImage' },
+        webserver: { windows: 'MiniWebserver-Win.exe', macos: 'MiniWebserver-Mac.dmg', linux: 'MiniWebserver-Linux.AppImage' },
+        code: { windows: 'pandora-code-Win.exe', macos: 'pandora-code-Mac.tar.gz', linux: 'pandora-code-Linux' },
+        chat: { windows: 'Ollama-Browser-Chat-Web.zip', macos: 'Ollama-Browser-Chat-Web.zip', linux: 'Ollama-Browser-Chat-Web.zip' }
+      };
+      var REQ = {
+        installer: { windows: 'Windows 10 oder neuer · Ollama separat installieren', macos: 'Apple Silicon · Rechtsklick, „Öffnen“', linux: 'x86_64 · mit chmod +x ausführbar machen' },
+        webserver: { windows: 'Windows 10 oder neuer · Firewall für „Privat“ erlauben', macos: 'Apple Silicon · Rechtsklick, „Öffnen“', linux: 'x86_64 · mit chmod +x ausführbar machen' },
+        code: { windows: 'Terminal: pandora-code-Win.exe code · braucht Ollama', macos: 'Entpacken, dann ./pandora-code code', linux: 'chmod +x, dann ./pandora-code-Linux code' },
+        chat: { windows: 'Für alle Systeme: entpacken und mit dem Mini Webserver ausliefern', macos: 'Für alle Systeme: entpacken und mit dem Mini Webserver ausliefern', linux: 'Für alle Systeme: entpacken und mit dem Mini Webserver ausliefern' }
+      };
+
+      function detectOS() {
+        var nav = navigator;
+        var uaData = nav.userAgentData && nav.userAgentData.platform ? nav.userAgentData.platform : '';
+        var all = (uaData + ' ' + (nav.platform || '') + ' ' + (nav.userAgent || '')).toLowerCase();
+        if (/android|iphone|ipad|ipod|mobile/.test(all)) return { os: null, mobile: true };
+        if (/mac/.test(all) && nav.maxTouchPoints > 1) return { os: null, mobile: true };
+        if (/win/.test(all)) return { os: 'windows' };
+        if (/mac|darwin/.test(all)) return { os: 'macos' };
+        if (/linux|x11|cros|ubuntu|debian|fedora/.test(all)) return { os: 'linux' };
+        return { os: null };
+      }
+
+      function showOS(os) {
+        document.querySelectorAll('.os-switch button').forEach(function (b) {
+          b.setAttribute('aria-pressed', b.getAttribute('data-os') === os ? 'true' : 'false');
+        });
+        document.querySelectorAll('.dl').forEach(function (li) {
+          var tool = li.getAttribute('data-tool');
+          var file = FILES[tool][os];
+          li.querySelector('[data-role="file"]').textContent = file;
+          li.querySelector('[data-role="req"]').textContent = REQ[tool][os];
+          var btn = li.querySelector('[data-role="btn"]');
+          btn.href = BASE + file;
+          btn.textContent = tool === 'chat' ? 'Web-Paket herunterladen' : 'Für ' + NAMES[os] + ' herunterladen';
+          var alt = li.querySelector('[data-role="alt"]');
+          if (alt) {
+            alt.innerHTML = os === 'linux'
+              ? 'Oder als <a href="' + BASE + 'pandora-code-Linux.deb" rel="noopener">.deb-Paket</a>: <code>sudo apt install ./pandora-code-Linux.deb</code>'
+              : 'Aus dem Quellcode: <code>pipx install git+https://github.com/' + REPO + '#subdirectory=apps/pandora-code</code>';
+          }
+        });
+      }
+
+      document.querySelectorAll('.os-switch button').forEach(function (b) {
+        b.addEventListener('click', function () { showOS(b.getAttribute('data-os')); });
+      });
+
+      var found = detectOS();
+      var heroNote = document.getElementById('heroNote');
+      var heroDl = document.getElementById('heroDl');
+      if (found.os) {
+        showOS(found.os);
+        heroDl.textContent = '⬇ Downloads für ' + NAMES[found.os];
+        heroNote.textContent = NAMES[found.os] + ' erkannt. Die passenden Dateien sind unten vorausgewählt.';
+      } else {
+        showOS('windows');
+        heroNote.textContent = found.mobile
+          ? 'Du bist am Handy: Den Live-Simulator kannst du gleich hier ausprobieren. Programme lädst du am Rechner herunter.'
+          : 'System nicht eindeutig erkannt. Bitte wähle unten dein System.';
+      }
+
+      /* ---------- Simulator ---------- */
+      var frame = document.getElementById('frame');
+      var sim = document.getElementById('sim');
+      var simFrame = document.getElementById('simFrame');
+      var simReady = false, pending = null;
+      simFrame.addEventListener('load', function () {
+        simReady = true;
+        if (pending) { send(pending); pending = null; }
+      });
+      function send(text) {
+        if (!simReady || !simFrame.contentWindow) { pending = text; return; }
+        simFrame.contentWindow.postMessage({ type: 'pandora-demo-send', text: text }, '*');
+      }
+      document.querySelectorAll('.chip').forEach(function (c) {
+        c.addEventListener('click', function () { send(c.getAttribute('data-say')); });
+      });
+      function setView(desktop) {
+        frame.classList.toggle('desktop', desktop);
+        sim.classList.toggle('is-desktop', desktop);
+        document.getElementById('viewPhone').setAttribute('aria-pressed', desktop ? 'false' : 'true');
+        document.getElementById('viewDesk').setAttribute('aria-pressed', desktop ? 'true' : 'false');
+      }
+      document.getElementById('viewPhone').addEventListener('click', function () { setView(false); });
+      document.getElementById('viewDesk').addEventListener('click', function () { setView(true); });
+
+      /* ---------- Lightbox ---------- */
+      var lb = document.getElementById('lb');
+      var lbImg = document.getElementById('lbImg');
+      document.querySelectorAll('.shot').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var img = b.querySelector('img');
+          lbImg.src = img.src;
+          lbImg.alt = img.alt || '';
+          if (lb.showModal) lb.showModal(); else window.open(lbImg.src, '_blank');
+        });
+      });
+      lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
+    })();
+  </script>
+</body>
+</html>
