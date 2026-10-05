@@ -29,11 +29,22 @@ class HookResult:
     error: str = ""
 
 
+_EXACT_LIST_CHARS = re.compile(r"^[A-Za-z0-9_\- ,|]+$")
+
+
 def matches(matcher: str, name: str) -> bool:
+    """Matcher-Grammatik 1:1 nach der offiziellen Claude-Code-Doku (code.claude.com/docs/en/hooks):
+    besteht der Matcher NUR aus Buchstaben/Ziffern/_/-/Leerzeichen/,/| -> exakte Zeichenkette, oder eine
+    Liste exakter Zeichenketten getrennt durch '|' oder ',' (Leerraum wird getrimmt); enthält er irgendein
+    anderes Zeichen -> unverankerter (nicht `fullmatch`!) regulärer Ausdruck, genau wie z. B. '^Notebook'
+    jedes mit 'Notebook' beginnende Werkzeug treffen soll, nicht nur ein Werkzeug namens exakt 'Notebook'."""
     if matcher in ("", "*"):
         return True
+    if _EXACT_LIST_CHARS.match(matcher):
+        parts = re.split(r"[|,]", matcher)
+        return name in {p.strip() for p in parts if p.strip()}
     try:
-        return re.fullmatch(matcher, name) is not None
+        return re.search(matcher, name) is not None
     except re.error:
         return matcher == name
 

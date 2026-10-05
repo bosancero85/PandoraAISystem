@@ -18,7 +18,7 @@ from pandora_code import cli
 from pandora_code.agent import Agent
 from pandora_code.config import Settings, load_settings
 from pandora_code.extensions import MODULES, install_all
-from pandora_code.extensions.hooks import HookRunner
+from pandora_code.extensions.hooks import HookRunner, matches
 from pandora_code.extensions.mcp import HttpTransport, McpServer
 from pandora_code.images import ImageError, MAX_IMAGES, encode_image, extract_images
 from pandora_code.ollama_client import OllamaClient
@@ -123,6 +123,60 @@ class PermissionModeTests(unittest.TestCase):
         perms.set_mode("plan")  # gleicher Modus überschreibt previous nicht
         self.assertEqual(perms.previous, "accept-edits")
         self.assertEqual(seen, ["plan", "plan"])
+
+
+class MatcherTests(unittest.TestCase):
+    """Verifiziert gegen die offiziell dokumentierte Claude-Code-Matcher-Grammatik
+    (code.claude.com/docs/en/hooks): leer/'*' = alles; nur Buchstaben/Ziffern/_/-/Leerzeichen/,/| = exakte
+    Zeichenkette oder durch '|'/',' getrennte Liste exakter Zeichenketten; sonst = unverankerter regulärer
+    Ausdruck (nicht 'fullmatch'!). Entstanden aus einem beim Entwickeln des Plugin-Systems gefundenen
+    echten Bug: Pandora nutzte durchgehend `re.fullmatch`, was weder Komma-getrennte Listen noch
+    Präfix-Muster wie '^Notebook' korrekt unterstützte."""
+
+    def test_empty_and_star_match_everything(self) -> None:
+        for matcher in ("", "*"):
+            self.assertTrue(matches(matcher, "Bash"))
+            self.assertTrue(matches(matcher, "irgendwas"))
+
+    def test_single_exact_name(self) -> None:
+        self.assertTrue(matches("Bash", "Bash"))
+        self.assertFalse(matches("Bash", "bash"))  # groß-/kleinschreibungssensitiv, wie dokumentiert
+        self.assertFalse(matches("Bash", "BashTool"))
+
+    def test_pipe_separated_list(self) -> None:
+        self.assertTrue(matches("Bash|Edit", "Bash"))
+        self.assertTrue(matches("Bash|Edit", "Edit"))
+        self.assertFalse(matches("Bash|Edit", "Write"))
+
+    def test_comma_separated_list_with_whitespace(self) -> None:
+        # Das war der eigentliche Bug: offiziell seit Claude Code 2.1.191 auch ',' als Trenner erlaubt,
+        # Pandoras alte re.fullmatch()-Implementierung behandelte ',' als wörtliches Zeichen und hätte
+        # 'Edit, Write' nie gegen 'Edit' matchen können.
+        self.assertTrue(matches("Edit, Write", "Edit"))
+        self.assertTrue(matches("Edit, Write", "Write"))
+        self.assertFalse(matches("Edit, Write", "Bash"))
+
+    def test_mixed_comma_and_pipe_separators(self) -> None:
+        self.assertTrue(matches("Bash, Edit|Write", "Write"))
+
+    def test_hyphen_allowed_in_exact_name(self) -> None:
+        self.assertTrue(matches("mcp__memory-server__tool", "mcp__memory-server__tool"))
+
+    def test_regex_is_unanchored_not_fullmatch(self) -> None:
+        # Offizielles Beispiel aus der Doku: '^Notebook' soll JEDES mit 'Notebook' beginnende Werkzeug
+        # treffen (z. B. 'NotebookRead', 'NotebookEdit'), nicht nur ein Werkzeug namens exakt 'Notebook'.
+        self.assertTrue(matches("^Notebook", "NotebookRead"))
+        self.assertTrue(matches("^Notebook", "NotebookEdit"))
+        self.assertFalse(matches("^Notebook", "ReadNotebook"))
+
+    def test_regex_dot_star_prefix_pattern(self) -> None:
+        self.assertTrue(matches("mcp__memory__.*", "mcp__memory__search"))
+        self.assertTrue(matches("mcp__memory__.*", "mcp__memory__store"))
+        self.assertFalse(matches("mcp__memory__.*", "mcp__other__search"))
+
+    def test_invalid_regex_falls_back_to_exact_string_without_crashing(self) -> None:
+        self.assertFalse(matches("(unclosed", "(unclosed"[:-1]))
+        self.assertTrue(matches("(unclosed", "(unclosed"))
 
 
 class HookTests(ExtCase):

@@ -53,7 +53,7 @@ liest keine Dateien, das macht nur Pandora Code über seine Werkzeuge.
 ## Modell und Ollama-Adresse dauerhaft festlegen
 `~/.pandora/settings.json` (Windows: `%USERPROFILE%\.pandora\settings.json`), Vorlage: `settings.example.json`:
 
-    {"model": "qwen2.5-coder:14b", "host": "http://192.168.178.40:11434"}
+    {"model": "qwen2.5-coder:14b", "host": "http://YOUR-IP:11434"}
 
 Vorrang Modell: `-m` > `$PANDORA_MODEL` > settings.json > automatische Wahl.
 Vorrang Host: `--host` > settings.json > `$OLLAMA_HOST` > `127.0.0.1:11434`.
@@ -215,8 +215,9 @@ Abschalten mit `--disable hooks|auto_fix|plan|vision|subagents|mcp|ast_graph|vec
   ```
   **Hot Reload** heißt hier: eine Installation (oder `/plugin reload`) wirkt **sofort** in der laufenden
   Sitzung – neue Subagenten stehen dem `Task`-Werkzeug im nächsten Zug zur Verfügung, neue Hooks werden live
-  in den laufenden Hook-Mechanismus gemergt (mit Warnung, falls ein Plugin eine Matcher-Ausdruckssyntax wie
-  ECC nutzt, die Pandoras einfacher Matcher nicht auswertet), neue MCP-Server werden sofort verbunden, neue
+  in den laufenden Hook-Mechanismus gemergt (der Matcher folgt exakt der offiziell dokumentierten
+  Claude-Code-Grammatik – einfache, durch `|`/`,` getrennte Werkzeugnamen oder ein unverankerter regulärer
+  Ausdruck), neue MCP-Server werden sofort verbunden, neue
   `/`-Befehle aus `commands/*.md` sind direkt nutzbar ($ARGUMENTS wird ersetzt) – alles ganz ohne Neustart.
   `skills/*/SKILL.md` wird erkannt und bei `/plugin` aufgelistet, aber (noch) nicht automatisch geladen –
   Pandora hat kein dateibasiertes Skill-Laufzeitsystem wie Claude Code; das ist eine bewusste, offen

@@ -14,12 +14,10 @@ Format eines Plugins (siehe code.claude.com/docs/en/plugins-reference):
     <plugin>/commands/*.md                 eigene Slash-Befehle (Markdown; $ARGUMENTS wird ersetzt)
     <plugin>/agents/*.md                   Subagenten – nutzt denselben Loader wie ~/.pandora/agents/
     <plugin>/hooks/hooks.json               Hook-Konfiguration – wird LIVE in den laufenden HookRunner gemerged.
-                                            Pandoras eigener Matcher (hooks.py) vergleicht nur den Werkzeug-
-                                            namen per Regex/Pipe-Alternation (z. B. "Bash|Edit"); nutzt ein
-                                            Plugin stattdessen eine reichhaltigere Ausdruckssyntax wie bei ECC
-                                            ('tool == "Edit" && tool_input.file_path matches "..."'), wird das
-                                            erkannt und beim Installieren deutlich gewarnt – ein solcher Hook
-                                            lädt zwar, feuert aber vermutlich nie.
+                                            Der Matcher (hooks.py, matches()) folgt exakt der offiziell
+                                            dokumentierten Claude-Code-Grammatik: eine einfache, durch '|'
+                                            oder ',' getrennte Werkzeugnamen-Liste (z. B. "Bash|Edit",
+                                            "Edit, Write") oder sonst ein unverankerter regulärer Ausdruck.
     <plugin>/.mcp.json                      MCP-Server – werden LIVE verbunden (gleiches Format wie Pandoras
                                             eigene .mcp.json, siehe extensions/mcp.py)
     <plugin>/skills/*/SKILL.md              progressiv durchsuchbar/ladbar über die Werkzeuge SkillSearch/
@@ -223,31 +221,20 @@ def _unwrap_hook_config(hooks_obj) -> dict | None:
     return None
 
 
-_SIMPLE_MATCHER = re.compile(r"^[A-Za-z0-9_|.*]*$")
-
-
-def _is_complex_matcher(matcher: str) -> bool:
-    """Pandoras eigener Matcher (extensions/hooks.py) prüft nur den WERKZEUG-NAMEN per Regex/Pipe-Alternation
-    (z. B. 'Bash|Edit'). Manche Plugins (z. B. ECC) nutzen stattdessen eine reichhaltigere Ausdruckssyntax
-    wie 'tool == \"Edit\" && tool_input.file_path matches \"\\.ts$\"' – das wertet Pandora NICHT aus, der
-    Hook würde lautlos nie feuern. Diese Heuristik erkennt solche Fälle, damit /plugin install ehrlich warnt
-    statt einen funktionslosen Hook stillschweigend als 'aktiv' zu melden."""
-    return not _SIMPLE_MATCHER.match(matcher or "*")
-
-
-def merge_hooks_live(agent, hooks_config: dict) -> tuple[bool, list[str]]:
-    """Gibt (gemerged?, Liste der Events mit einem zu komplexen Matcher) zurück."""
+def merge_hooks_live(agent, hooks_config: dict) -> bool:
+    """Mergt in den laufenden HookRunner. Matcher-Kompatibilität: siehe extensions/hooks.py's `matches()` –
+    implementiert die vollständige, offiziell dokumentierte Claude-Code-Grammatik (einfache Werkzeugnamen-
+    Liste getrennt durch '|'/',' ODER unverankerter regulärer Ausdruck), es gibt also keine bekannte Lücke
+    mehr, vor der hier gewarnt werden müsste – frühere Annahmen über eine zusätzliche '&&'/'||'-Ausdrucks-
+    syntax beruhten auf einer Fehlinterpretation einer zusammenfassenden Beschreibung, nicht auf echtem
+    hooks.json-Inhalt; die offizielle Doku stellt ausdrücklich klar, dass es diese Syntax nicht gibt."""
     target = _unwrap_hook_config(getattr(agent, "hooks", None))
     if target is None:
-        return False, []
-    complex_events: list[str] = []
+        return False
     for event, groups in (hooks_config or {}).items():
-        if not isinstance(groups, list):
-            continue
-        target.setdefault(event, []).extend(groups)
-        if any(_is_complex_matcher(str(g.get("matcher", ""))) for g in groups if isinstance(g, dict)):
-            complex_events.append(event)
-    return True, complex_events
+        if isinstance(groups, list):
+            target.setdefault(event, []).extend(groups)
+    return True
 
 
 def connect_mcp_servers_live(agent, mcp_config: dict) -> tuple[int, int]:
@@ -317,16 +304,8 @@ def apply_plugin(agent, plugin_dir: Path, source: str, *, confirm) -> PluginReco
 
     if components.hooks_file:
         hooks_config = read_json(components.hooks_file) or {}
-        merged, complex_events = merge_hooks_live(agent, hooks_config)
-        if merged:
+        if merge_hooks_live(agent, hooks_config):
             agent.notice(f"Plugin '{name}': Hooks aktiv.")
-        if complex_events:
-            agent.notice(
-                f"Plugin '{name}': Hooks für {', '.join(complex_events)} nutzen eine Matcher-Ausdruckssyntax "
-                "(z. B. 'tool == \"Edit\" && ...'), die Pandoras Hook-Matcher nicht auswertet – diese Hooks "
-                "werden geladen, aber vermutlich NIE feuern. Nur einfache Werkzeugnamen/Regex (z. B. "
-                "'Bash|Edit') funktionieren.", error=True,
-            )
     if components.mcp_file:
         mcp_config = read_json(components.mcp_file) or {}
         connected, tools = connect_mcp_servers_live(agent, mcp_config)

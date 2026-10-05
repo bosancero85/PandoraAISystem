@@ -214,34 +214,6 @@ class InstallEndToEndTests(ExtCase):
         handler, _ = agent.commands["greet"]
         self.assertEqual(handler("Aki", agent, agent.ui), "Hallo Aki, von Plugin demo!")
 
-    def test_install_warns_about_complex_expression_matchers_like_ecc_uses(self) -> None:
-        # Echtes Beispiel aus ECC (github.com/affaan-m/ECC) hooks/hooks.json: eine Ausdruckssyntax statt
-        # eines einfachen Werkzeugnamens/Regex – Pandoras eigener Matcher (extensions/hooks.py) wertet nur
-        # den Werkzeugnamen aus, ein solcher Hook würde also lautlos NIE feuern. /plugin install muss das
-        # erkennen und deutlich warnen statt stillschweigend "Hooks aktiv" zu meldet.
-        source_dir = make_demo_plugin(self.cwd, name="eccstyle")
-        (source_dir / "hooks" / "hooks.json").write_text(json.dumps({
-            "PreToolUse": [{
-                "matcher": 'tool == "Edit" && tool_input.file_path matches "\\\\.(ts|tsx)$"',
-                "hooks": [{"type": "command", "command": "echo check"}],
-            }],
-        }), encoding="utf-8")
-        agent, _ = self.make_agent([])
-        notices = []
-        agent.notice = lambda text, error=False: notices.append((text, error))
-        install_plugin(agent, str(source_dir), confirm=lambda p: True)
-        warning = next((t for t, err in notices if err and "PreToolUse" in t), None)
-        self.assertIsNotNone(warning, notices)
-        self.assertIn("NIE feuern", warning)
-
-    def test_install_does_not_warn_for_simple_tool_name_matchers(self) -> None:
-        source_dir = make_demo_plugin(self.cwd)  # Standard-Demo nutzt 'Stop' ohne eigenen Matcher (= '*')
-        agent, _ = self.make_agent([])
-        notices = []
-        agent.notice = lambda text, error=False: notices.append((text, error))
-        install_plugin(agent, str(source_dir), confirm=lambda p: True)
-        self.assertFalse(any(err and "NIE feuern" in t for t, err in notices))
-
     def test_install_merges_hooks_into_live_hook_runner(self) -> None:
         source_dir = make_demo_plugin(self.cwd)
         agent, _ = self.make_agent([])
