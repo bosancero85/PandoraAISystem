@@ -4,178 +4,180 @@
 
 # Pandora® AI System
 
-**Dein lokales KI-Werkzeugset rund um Ollama: Modelle installieren, per Handy chatten, im Terminal programmieren. Ohne Cloud, ohne Konto, auf deiner eigenen Hardware.**
+**Your local AI toolkit around Ollama: install models, chat from your phone, code in the terminal. No cloud, no account, on your own hardware.**
 
-[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
-![Plattformen](https://img.shields.io/badge/Plattformen-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)
-![Ollama](https://img.shields.io/badge/lokal-Ollama-9D00FF.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)
+![Ollama](https://img.shields.io/badge/local-Ollama-9D00FF.svg)
 [![Release](https://img.shields.io/github/v/release/bosancero85/PandoraAISystem?label=Release)](https://github.com/bosancero85/PandoraAISystem/releases/latest)
 
-[Landingpage mit Live-Simulator](https://bosancero85.github.io/PandoraAISystem/) · [Downloads](https://github.com/bosancero85/PandoraAISystem/releases/latest) · [English](README.md)
+[Landing page with live simulator](https://bosancero85.github.io/PandoraAISystem/) · [Downloads](https://github.com/bosancero85/PandoraAISystem/releases/latest) · [Deutsch](README.de.md)
 
 </div>
 
 ---
 
-## Inhalt
+## Contents
 
-- [Überblick](#überblick)
-- [Die vier Werkzeuge](#die-vier-werkzeuge)
-- [Schnellstart](#schnellstart)
+- [Overview](#overview)
+- [The four tools](#the-four-tools)
+- [Quick start](#quick-start)
 - [Downloads](#downloads)
-- [Aus dem Quellcode bauen](#aus-dem-quellcode-bauen)
-- [Projektstruktur](#projektstruktur)
+- [Build from source](#build-from-source)
+- [Repository layout](#repository-layout)
 - [Tests](#tests)
-- [Lizenz](#lizenz)
+- [License](#license)
 
-## Überblick
+> The user interfaces and the in-depth documentation of the tools are in German. A full German README is available in [README.de.md](README.de.md).
 
-Pandora AI System bündelt vier kleine Programme, die zusammen eine komplette lokale KI-Umgebung ergeben. Alles läuft über [Ollama](https://ollama.com) auf deinem eigenen Rechner. Es werden keine Daten an Dritte geschickt.
+## Overview
+
+Pandora AI System bundles four small programs that together form a complete local AI environment. Everything runs through [Ollama](https://ollama.com) on your own machine. No data is sent to third parties.
 
 ```mermaid
 flowchart LR
-    H["Handy / Browser"] -- "HTTPS" --> W["Mini Webserver"]
-    W -- "liefert" --> C["Ollama Browser Chat"]
+    H["Phone / Browser"] -- "HTTPS" --> W["Mini Webserver"]
+    W -- "serves" --> C["Ollama Browser Chat"]
     W -- "/api" --> O[("Ollama")]
     I["Models Installer"] -- "ollama pull" --> O
-    K["Pandora Code (Terminal)"] -- "HTTP" --> O
+    K["Pandora Code (terminal)"] -- "HTTP" --> O
 ```
 
-Der **Mini Webserver** liefert den Chat per HTTPS ans Handy aus (nur dann gibt der Browser das Mikrofon zum Diktieren frei) und leitet `/api` an Ollama weiter. Der **Models Installer** holt die Modelle, **Pandora Code** nutzt sie als Coding-Agent im Terminal.
+The **Mini Webserver** serves the chat to your phone over HTTPS (browsers only allow the microphone for dictation on secure origins) and forwards `/api` to Ollama. The **Models Installer** fetches models, **Pandora Code** uses them as a coding agent in the terminal.
 
-## Die vier Werkzeuge
+## The four tools
 
 ### 1. Ollama Browser Chat
 
-Chat-Oberfläche für Handy und Desktop in einer Handvoll Dateien, ohne Abhängigkeiten, ohne CDN. Chats, Projekte und Artefakte bleiben lokal im Browser.
+A chat UI for phone and desktop in a handful of files, with no dependencies and no CDN. Chats, projects and artifacts stay in your browser.
 
-- Streaming-Antworten mit Abbrechen, Markdown und Code-Blöcken mit Kopieren-Knopf
-- **Digitale 7-Segment-Token-Anzeige** (IN, OUT, Σ) mit **Kontextwarnung**: Wird das Kontextfenster voll, färbt sich IN gelb und dann rot
-- Diktieren per Spracheingabe, Bild- und Datei-Anhänge, mehrere Chats, Export und Import
-- Als App auf dem Homescreen installierbar (PWA)
+- Streaming answers with stop button, Markdown and code blocks with a copy button
+- **Digital 7-segment token display** (IN, OUT, Σ) with a **context warning**: when the context window fills up, IN turns yellow, then red
+- Voice dictation, image and file attachments, multiple chats, export and import
+- Installable on the home screen (PWA)
 
 <p align="center">
-  <img src="docs/screenshots/chat-desktop.png" alt="Ollama Browser Chat auf dem Desktop" width="62%">
-  <img src="docs/screenshots/chat-handy.png" alt="Ollama Browser Chat auf dem Handy" width="22%">
-  <img src="docs/screenshots/chat-kontextwarnung.png" alt="Rote Kontextwarnung in der Token-Anzeige" width="22%">
+  <img src="docs/screenshots/chat-desktop.png" alt="Ollama Browser Chat on desktop" width="62%">
+  <img src="docs/screenshots/chat-handy.png" alt="Ollama Browser Chat on a phone" width="22%">
+  <img src="docs/screenshots/chat-kontextwarnung.png" alt="Red context warning in the token display" width="22%">
 </p>
 
-Die Chat-Bilder entstanden mit der echten App und simulierten Antworten. Unter [Landingpage](https://bosancero85.github.io/PandoraAISystem/) kannst du denselben **Live-Simulator** direkt im Browser ausprobieren.
+These chat images were taken with the real app and simulated answers. The [landing page](https://bosancero85.github.io/PandoraAISystem/) lets you try the same **live simulator** in your browser.
 
-Ordner: [`apps/ollama-browser-chat`](apps/ollama-browser-chat)
+Folder: [`apps/ollama-browser-chat`](apps/ollama-browser-chat)
 
 ### 2. Mini Webserver
 
-Windows-Werkzeug (auch aus dem Quellcode unter Linux und macOS startbar), das einen Ordner im Netzwerk ausliefert. Ersetzt `python -m http.server`.
+A Windows tool (also runnable from source on Linux and macOS) that serves a folder on your network. Replaces `python -m http.server`.
 
-- Start/Stopp per Knopf, Log, Adresse fürs Handy mit Kopieren-Knopf, Tray-Symbol
-- **HTTPS** mit selbst erzeugter Zertifizierungsstelle, die sich bei IP-Wechsel automatisch ein neues Zertifikat ausstellt
-- **Ollama-Weiterleitung** (`/api`) mit Streaming, damit HTTPS-Seiten kein unsicheres `http://`-Ollama aufrufen müssen
+- Start/stop button, access log, phone address with copy button, tray icon
+- **HTTPS** with a self-made certificate authority that re-issues its certificate when your IP changes
+- **Ollama forwarding** (`/api`) with streaming, so HTTPS pages do not have to call an insecure `http://` Ollama
 
 <p align="center"><img src="docs/screenshots/mini-webserver.png" alt="Mini Webserver" width="38%"></p>
 
-Ordner: [`apps/mini-webserver`](apps/mini-webserver)
+Folder: [`apps/mini-webserver`](apps/mini-webserver)
 
 ### 3. Ollama Models Library & Installer
 
-Grafische Oberfläche statt `ollama pull …`: die komplette Ollama-Bibliothek (238 Modellfamilien), Suche, Kategorien, Größenwahl, Speicherschätzung und Batch-Installation mit Fortschritt.
+A graphical interface instead of `ollama pull …`: the full Ollama library (238 model families), search, categories, size selection, storage estimate and batch installation with progress.
 
 <p align="center"><img src="docs/screenshots/models-installer.png" alt="Ollama Models Library & Installer" width="62%"></p>
 
-Ordner: [`apps/ollama-models-installer`](apps/ollama-models-installer)
+Folder: [`apps/ollama-models-installer`](apps/ollama-models-installer)
 
 ### 4. Pandora Code
 
-Lokaler Coding-Agent für das Terminal, bedient wie Claude Code, aber über deinen Ollama-Server und nur mit der Python-Standardbibliothek.
+A local coding agent for the terminal, operated like Claude Code but running on your Ollama server and using only the Python standard library.
 
-- Werkzeuge: Read, Write, Edit, Bash, Glob, Grep, LS, TodoWrite. Änderungen und Befehle bestätigst du mit Diff-Vorschau
-- Berechtigungsmodi `ask`, `accept-edits`, `plan` (nur lesen) und `yolo`
-- Modell-Router mit automatischem Fallback, AST-Code-Graph, Vektor-RAG, Auto-Fix (Lint und Tests), Subagenten, Hooks, MCP, Bildeingabe
-- Optionale Sandbox (Firejail oder Docker) und optionale Textual-Oberfläche (`--tui`)
+- Tools: Read, Write, Edit, Bash, Glob, Grep, LS, TodoWrite. You confirm changes and commands with a diff preview
+- Permission modes `ask`, `accept-edits`, `plan` (read only) and `yolo`
+- Model router with automatic fallback, AST code graph, vector RAG, auto-fix (lint and tests), subagents, hooks, MCP, image input
+- Optional sandbox (Firejail or Docker) and optional Textual interface (`--tui`)
 
 <p align="center">
-  <img src="docs/screenshots/pandora-code-terminal.png" alt="Pandora Code im Terminal" width="30%">
-  <img src="docs/screenshots/pandora-code-tui.png" alt="Pandora Code Textual-Oberfläche" width="60%">
+  <img src="docs/screenshots/pandora-code-terminal.png" alt="Pandora Code in the terminal" width="30%">
+  <img src="docs/screenshots/pandora-code-tui.png" alt="Pandora Code Textual interface" width="60%">
 </p>
 
-Ordner: [`apps/pandora-code`](apps/pandora-code)
+Folder: [`apps/pandora-code`](apps/pandora-code)
 
-## Schnellstart
+## Quick start
 
-1. **Ollama installieren:** <https://ollama.com/download>
-2. **Modelle holen** mit dem **Models Installer** (oder `ollama pull qwen2.5-coder:7b`).
-3. **Mini Webserver** starten, den Ordner `apps/ollama-browser-chat` wählen, HTTPS an lassen, auf „Server starten“ klicken. Läuft Ollama auf einem anderen Rechner, trage dessen Adresse ein.
-4. Am **Handy** (gleiches WLAN) die angezeigte Adresse öffnen, zum Beispiel `https://192.168.178.40:8080/ollama.html`. Beim ersten Mal die Zertifikatswarnung bestätigen („Erweitert“, dann „Weiter“).
-5. **Pandora Code** im Projektordner starten: `pandora code`.
+1. **Install Ollama:** <https://ollama.com/download>
+2. **Get models** with the **Models Installer** (or `ollama pull qwen2.5-coder:7b`).
+3. Start the **Mini Webserver**, pick the folder `apps/ollama-browser-chat`, keep HTTPS on, click "Server starten". If Ollama runs on another machine, enter its address.
+4. On your **phone** (same Wi-Fi) open the shown address, for example `https://192.168.178.40:8080/ollama.html`. Confirm the certificate warning the first time ("Advanced", then "Proceed").
+5. Run **Pandora Code** in a project folder: `pandora code`.
 
-> **Tipp für 8 GB Grafikspeicher:** `qwen2.5-coder:7b` läuft komplett auf der Grafikkarte. Stelle im Chat das Kontextfenster (`num_ctx`) auf 8192, damit lange Code-Antworten den Verlauf nicht sprengen.
+> **Tip for 8 GB of VRAM:** `qwen2.5-coder:7b` fits completely on the GPU. Set the context window (`num_ctx`) to 8192 in the chat so long code answers do not overflow the history.
 
 ## Downloads
 
-Fertige Programme gibt es unter [Releases](https://github.com/bosancero85/PandoraAISystem/releases/latest). Die Mac-Programme sind für Apple Silicon (arm64) gebaut.
+Ready-made programs are on the [Releases](https://github.com/bosancero85/PandoraAISystem/releases/latest) page. The Mac builds target Apple Silicon (arm64).
 
-| Werkzeug | Windows | macOS | Linux |
+| Tool | Windows | macOS | Linux |
 |---|---|---|---|
 | Models Installer | [`Ollama-Installer-Win.exe`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/Ollama-Installer-Win.exe) | [`Ollama-Installer-Mac.dmg`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/Ollama-Installer-Mac.dmg) | [`Ollama-Installer-Linux.AppImage`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/Ollama-Installer-Linux.AppImage) |
 | Mini Webserver | [`MiniWebserver-Win.exe`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/MiniWebserver-Win.exe) | [`MiniWebserver-Mac.dmg`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/MiniWebserver-Mac.dmg) | [`MiniWebserver-Linux.AppImage`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/MiniWebserver-Linux.AppImage) |
-| Pandora Code | [`pandora-code-Win.exe`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Win.exe) | [`pandora-code-Mac.tar.gz`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Mac.tar.gz) | [`pandora-code-Linux`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Linux) oder [`.deb`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Linux.deb) |
-| Ollama Browser Chat | [`Ollama-Browser-Chat-Web.zip`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/Ollama-Browser-Chat-Web.zip) (für alle Systeme, Ordner entpacken und ausliefern) | | |
+| Pandora Code | [`pandora-code-Win.exe`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Win.exe) | [`pandora-code-Mac.tar.gz`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Mac.tar.gz) | [`pandora-code-Linux`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Linux) or [`.deb`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/pandora-code-Linux.deb) |
+| Ollama Browser Chat | [`Ollama-Browser-Chat-Web.zip`](https://github.com/bosancero85/PandoraAISystem/releases/latest/download/Ollama-Browser-Chat-Web.zip) (all systems, unzip and serve the folder) | | |
 
-Die Prüfsummen stehen in `SHA256SUMS.txt` im selben Release.
+Checksums are in `SHA256SUMS.txt` in the same release.
 
-**Hinweise:**
+**Notes:**
 
-- **Linux:** AppImage mit `chmod +x <Datei>` ausführbar machen. Das `.deb` installierst du mit `sudo apt install ./pandora-code-Linux.deb`.
-- **macOS:** Die Programme sind nicht signiert. Beim ersten Start: Rechtsklick auf die App, „Öffnen“.
-- **Windows:** SmartScreen warnt bei unsignierten Programmen. „Weitere Informationen“, dann „Trotzdem ausführen“.
+- **Linux:** make the AppImage executable with `chmod +x <file>`. Install the `.deb` with `sudo apt install ./pandora-code-Linux.deb`.
+- **macOS:** the apps are not signed. On first launch: right-click the app, "Open".
+- **Windows:** SmartScreen warns about unsigned programs. "More info", then "Run anyway".
 
-## Aus dem Quellcode bauen
+## Build from source
 
-Ein einziges Skript baut alles für das System, auf dem du gerade arbeitest (PyInstaller kann nicht für andere Systeme bauen):
+One script builds everything for the system you are on (PyInstaller cannot cross-compile):
 
 ```bash
 pip install -r requirements-build.txt
-python scripts/build_release.py --app all          # oder: installer | webserver | code | chat
+python scripts/build_release.py --app all          # or: installer | webserver | code | chat
 ```
 
-Das Ergebnis liegt in `release/`. Mit `--dry-run` zeigt das Skript nur die Befehle an. Zusätzlich hat jedes Werkzeug seine eigenen Build-Dateien (`build.bat`, `build_mac.sh`, `build_deb.sh`) in seinem Ordner.
+The result is placed in `release/`. With `--dry-run` the script only prints the commands. Each tool also has its own build files (`build.bat`, `build_mac.sh`, `build_deb.sh`) in its folder.
 
-Der Release-Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) baut alle Pakete für Windows, macOS und Linux und hängt sie an ein Release, sobald du einen Tag wie `v1.0.0` pusht:
+The release workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) builds all packages for Windows, macOS and Linux and attaches them to a release when you push a tag like `v1.0.0`:
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-## Projektstruktur
+## Repository layout
 
 ```text
 PandoraAISystem/
-├── index.html                  Landingpage (eine Datei, mit Live-Simulator)
+├── index.html                  Landing page (single file, with live simulator)
 ├── apps/
-│   ├── ollama-browser-chat/    Chat (HTML, CSS, JS) und PWA-Dateien
-│   ├── mini-webserver/         HTTPS-Webserver mit Ollama-Weiterleitung (Python)
-│   ├── ollama-models-installer/  Modell-Installer (Python, CustomTkinter)
-│   └── pandora-code/           Coding-Agent fürs Terminal (Python)
-├── scripts/                    Landingpage-Bau, Release-Pakete, Tests
-├── docs/                       Banner, Logo, Screenshots
+│   ├── ollama-browser-chat/    Chat (HTML, CSS, JS) and PWA files
+│   ├── mini-webserver/         HTTPS web server with Ollama forwarding (Python)
+│   ├── ollama-models-installer/  Model installer (Python, CustomTkinter)
+│   └── pandora-code/           Terminal coding agent (Python)
+├── scripts/                    Landing page build, release packaging, tests
+├── docs/                       Banner, logo, screenshots
 ├── .github/workflows/          ci.yml, release.yml, pages.yml
-└── playbook/                   Projektsteuerung
+└── playbook/                   Project control files
 ```
 
-Die Landingpage wird aus `scripts/landing_template.html`, den Screenshots und dem echten Chat zu einer einzigen `index.html` gebaut: `python scripts/build_landing.py`.
+The landing page is built from `scripts/landing_template.html`, the screenshots and the real chat into one `index.html`: `python scripts/build_landing.py`.
 
 ## Tests
 
 ```bash
-node apps/ollama-browser-chat/tests/run.js                      # Chat
-python -m unittest discover -s apps/mini-webserver/tests        # Webserver
+node apps/ollama-browser-chat/tests/run.js                      # chat
+python -m unittest discover -s apps/mini-webserver/tests        # web server
 python -m unittest discover -s apps/pandora-code/tests -t apps/pandora-code   # Pandora Code
-python -m unittest discover -s scripts -p "test_*.py"           # Landingpage und Build-Skript
+python -m unittest discover -s scripts -p "test_*.py"           # landing page and build script
 ```
 
-Die GitHub-Aktion [`ci.yml`](.github/workflows/ci.yml) führt alle Tests bei jedem Push aus.
+The GitHub Action [`ci.yml`](.github/workflows/ci.yml) runs all tests on every push.
 
-## Lizenz
+## License
 
-MIT, siehe [LICENSE](LICENSE). Pandora® | by AKI_SystemDown ©2026
+MIT, see [LICENSE](LICENSE). Pandora® | by AKI_SystemDown ©2026
